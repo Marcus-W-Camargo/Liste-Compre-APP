@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   title: { textAlign: 'center', fontFamily: fonts.bold, fontSize: 15 },
   down: { textAlign: 'center', fontFamily: fonts.black, color: colors.orange, fontSize: 24, lineHeight: 18, marginVertical: 1 },
   pressed: { opacity: 0.86, transform: [{ scale: 0.99 }] },
-  summary: { marginTop: 'auto', paddingVertical: 10, marginBottom: 2 },
+  summary: { marginTop: 'auto', paddingVertical: 10, marginBottom: 2, transform: [{ translateY: 30 }] },
   summaryTitle: { fontFamily: fonts.bold, fontSize: 13, marginBottom: 7 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-around' },
   summaryItem: { alignItems: 'center' },
