@@ -3,7 +3,7 @@ import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { AppText } from './AppText';
 import { useAuth } from '@/providers/AuthProvider';
-import { obterFotoPerfil } from '@/lib/profilePhoto';
+import { obterFotoPerfil, obterFotoPerfilEmCache } from '@/lib/profilePhoto';
 import { colors, fonts } from '@/theme';
 
 type TabTopBarProps = {
@@ -13,7 +13,7 @@ type TabTopBarProps = {
 
 export function TabTopBar({ showGreeting = false, photoUri }: TabTopBarProps) {
   const { user, name } = useAuth();
-  const [loadedPhoto, setLoadedPhoto] = useState<string | null>(null);
+  const [loadedPhoto, setLoadedPhoto] = useState<string | null>(() => user?.id ? obterFotoPerfilEmCache(user.id) : null);
 
   useFocusEffect(
     useCallback(() => {
@@ -27,13 +27,14 @@ export function TabTopBar({ showGreeting = false, photoUri }: TabTopBarProps) {
         };
       }
 
+      const cached = obterFotoPerfilEmCache(user.id);
+      if (cached) setLoadedPhoto(cached);
+
       void obterFotoPerfil(user.id)
         .then((url) => {
-          if (active) setLoadedPhoto(url);
+          if (active && url) setLoadedPhoto(url);
         })
-        .catch(() => {
-          if (active) setLoadedPhoto(null);
-        });
+        .catch(() => undefined);
 
       return () => {
         active = false;
@@ -50,6 +51,7 @@ export function TabTopBar({ showGreeting = false, photoUri }: TabTopBarProps) {
         source={require('../assets/ListeLogo.png')}
         style={styles.logo}
         resizeMode="contain"
+        fadeDuration={0}
       />
 
       <View style={styles.accountArea}>
@@ -65,7 +67,7 @@ export function TabTopBar({ showGreeting = false, photoUri }: TabTopBarProps) {
           style={({ pressed }) => [styles.accountButton, pressed && styles.accountPressed]}
         >
           {photo ? (
-            <Image source={{ uri: photo }} style={styles.accountPhoto} />
+            <Image source={{ uri: photo }} style={styles.accountPhoto} fadeDuration={0} />
           ) : (
             <AppText style={styles.accountFallback}>👤</AppText>
           )}
