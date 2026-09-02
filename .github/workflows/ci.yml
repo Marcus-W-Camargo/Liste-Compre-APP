@@ -20,6 +20,16 @@ jobs:
           node-version: 24
       - name: Install dependencies
         run: npm install --no-audit --no-fund
+      - name: Sync official product catalog
+        run: |
+          npm run catalog:sync
+          if ! git diff --quiet -- src/data/produtosMercado.json || [ -n "$(git ls-files --others --exclude-standard src/data/produtosMercado.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/data/produtosMercado.json
+            git commit -m "chore: sincroniza catálogo oficial [skip ci]"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
       - name: TypeScript
         env:
           GH_TOKEN: ${{ github.token }}
