@@ -1,0 +1,1 @@
+export const officialLogoDataUri = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZMAAADjCAYAAABA...';
