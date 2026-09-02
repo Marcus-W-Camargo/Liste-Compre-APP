@@ -1,6 +1,6 @@
 import { Redirect, withLayoutContext } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import type { ParamListBase, TabNavigationState } from 'expo-router/react-navigation';
+import type { RouteProp, TabNavigationState } from 'expo-router/react-navigation';
 import {
   createMaterialTopTabNavigator,
   type MaterialTopTabNavigationEventMap,
@@ -10,11 +10,18 @@ import { AppText } from '@/components/AppText';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, fonts } from '@/theme';
 
-const { Navigator } = createMaterialTopTabNavigator();
+type MainTabsParamList = {
+  home: undefined;
+  listas: undefined;
+  comprar: undefined;
+  historico: undefined;
+};
+
+const { Navigator } = createMaterialTopTabNavigator<MainTabsParamList>();
 const SwipeTabs = withLayoutContext<
   MaterialTopTabNavigationOptions,
   typeof Navigator,
-  TabNavigationState<ParamListBase>,
+  TabNavigationState<MainTabsParamList>,
   MaterialTopTabNavigationEventMap
 >(Navigator);
 
@@ -29,7 +36,7 @@ export default function TabsLayout() {
     <SwipeTabs
       initialRouteName="home"
       tabBarPosition="bottom"
-      screenOptions={({ route }) => ({
+      screenOptions={({ route }: { route: RouteProp<MainTabsParamList, keyof MainTabsParamList> }) => ({
         swipeEnabled: true,
         animationEnabled: true,
         tabBarShowIcon: true,
@@ -40,7 +47,7 @@ export default function TabsLayout() {
         tabBarLabelStyle: styles.label,
         tabBarStyle: styles.bar,
         tabBarItemStyle: styles.item,
-        tabBarIcon: ({ color }) => (
+        tabBarIcon: ({ color }: { color: string }) => (
           <AppText
             style={[
               styles.icon,
