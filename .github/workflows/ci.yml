@@ -1,0 +1,64 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main, feat/mobile-app-v1]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Sync official product catalog
+        run: |
+          npm run catalog:sync
+          git diff --exit-code -- src/data/produtosMercado.json
+      - name: TypeScript
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set +e
+          output="$(npm run typecheck 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            { printf '### Diagnóstico automático do TypeScript\n\n```text\n'; printf '%s\n' "$output" | head -c 50000; printf '\n```\n'; } > /tmp/diagnostic.md
+            gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@/tmp/diagnostic.md || true
+            exit "$status"
+          fi
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set +e
+          output="$(npm test 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            { printf '### Diagnóstico automático dos testes\n\n```text\n'; printf '%s\n' "$output" | head -c 50000; printf '\n```\n'; } > /tmp/diagnostic.md
+            gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@/tmp/diagnostic.md || true
+            exit "$status"
+          fi
+      - name: Expo Doctor
+        run: npm run doctor
+      - name: Android JS bundle
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://fwrysuahhxvncwnvamze.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+          EXPO_PUBLIC_WEB_API_URL: https://listeecompre.vercel.app
+        run: npm run export:android

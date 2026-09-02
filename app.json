@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Liste & Compre",
+    "slug": "liste-compre-app",
+    "scheme": "listecompre",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "android": {
+      "package": "com.marcuscamargo.listecompre",
+      "edgeToEdgeEnabled": true
+    },
+    "ios": {
+      "bundleIdentifier": "com.marcuscamargo.listecompre",
+      "supportsTablet": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Liste & Compre usa sua galeria somente quando você escolhe uma foto de perfil.",
+          "cameraPermission": "O Liste & Compre usa a câmera somente quando você escolhe tirar uma foto de perfil.",
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
