@@ -6,8 +6,13 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./src/assets/ListeLogo.png",
     "android": {
-      "package": "com.marcuscamargo.listecompre"
+      "package": "com.marcuscamargo.listecompre",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/ListeLogo.png",
+        "backgroundColor": "#FFFFFF"
+      }
     },
     "ios": {
       "bundleIdentifier": "com.marcuscamargo.listecompre",
