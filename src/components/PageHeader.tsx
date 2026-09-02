@@ -1,19 +1,18 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
 import { AppText } from './AppText';
-import { Brand } from './Brand';
 import { colors, fonts } from '@/theme';
 
 export function PageHeader({ title, subtitle, back = false }: { title: string; subtitle?: string; back?: boolean }) {
   return (
     <View style={styles.root}>
-      <View style={styles.row}>
-        {back ? (
+      {back ? (
+        <View style={styles.row}>
           <Pressable accessibilityRole="button" accessibilityLabel="Voltar" onPress={() => router.back()} style={styles.back}>
             <AppText style={styles.backText}>‹</AppText>
           </Pressable>
-        ) : <Brand compact />}
-      </View>
+        </View>
+      ) : null}
       <AppText style={styles.title}>{title}</AppText>
       {subtitle ? <AppText style={styles.subtitle}>{subtitle}</AppText> : null}
     </View>
