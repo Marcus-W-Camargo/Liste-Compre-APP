@@ -1,12 +1,10 @@
-import { useCallback, useState } from 'react';
-import { router, useFocusEffect } from 'expo-router';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { router } from 'expo-router';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Screen } from '@/components/Screen';
+import { TabTopBar } from '@/components/TabTopBar';
 import { Card } from '@/components/Card';
 import { AppText } from '@/components/AppText';
-import { useAuth } from '@/providers/AuthProvider';
 import { useCloud } from '@/providers/CloudProvider';
-import { obterFotoPerfil } from '@/lib/profilePhoto';
 import { colors, fonts, radii } from '@/theme';
 
 const steps = [
@@ -16,63 +14,12 @@ const steps = [
 ];
 
 export default function HomeTab() {
-  const { user, name } = useAuth();
   const { data, status } = useCloud();
-  const [photo, setPhoto] = useState<string | null>(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      if (!user?.id) {
-        setPhoto(null);
-        return () => {
-          active = false;
-        };
-      }
-
-      void obterFotoPerfil(user.id)
-        .then((url) => {
-          if (active) setPhoto(url);
-        })
-        .catch(() => {
-          if (active) setPhoto(null);
-        });
-
-      return () => {
-        active = false;
-      };
-    }, [user?.id]),
-  );
 
   return (
     <Screen scroll={false}>
       <View style={styles.content}>
-        <View style={styles.topRow}>
-          <Image
-            accessibilityLabel="Liste & Compre"
-            source={require('../../src/assets/ListeLogo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-
-          <View style={styles.accountArea}>
-            <AppText numberOfLines={1} style={styles.greeting}>
-              Olá{name ? `, ${name.split(' ')[0]}` : ''}
-            </AppText>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Minha conta"
-              onPress={() => router.push('/(tabs)/conta')}
-              style={({ pressed }) => [styles.accountButton, pressed && styles.accountPressed]}
-            >
-              {photo ? (
-                <Image source={{ uri: photo }} style={styles.accountPhoto} />
-              ) : (
-                <AppText style={styles.accountFallback}>👤</AppText>
-              )}
-            </Pressable>
-          </View>
-        </View>
+        <TabTopBar showGreeting />
 
         <AppText style={styles.question}>Por onde começamos?</AppText>
 
@@ -121,14 +68,6 @@ function Summary({ value, label }: { value: number | string; label: string }) {
 
 const styles = StyleSheet.create({
   content: { flex: 1, width: '100%' },
-  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 4 },
-  logo: { width: 150, height: 84 },
-  accountArea: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8, flex: 1 },
-  greeting: { fontFamily: fonts.bold, fontSize: 13, textAlign: 'right', flexShrink: 1 },
-  accountButton: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, borderColor: colors.navy, backgroundColor: colors.cream, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
-  accountPhoto: { width: '100%', height: '100%' },
-  accountFallback: { fontSize: 24 },
-  accountPressed: { opacity: 0.82, transform: [{ scale: 0.97 }] },
   question: { textAlign: 'center', fontFamily: fonts.black, fontSize: 21, marginTop: 4, marginBottom: 10 },
   steps: { marginTop: 6 },
   step: { minHeight: 74, alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 11 },
