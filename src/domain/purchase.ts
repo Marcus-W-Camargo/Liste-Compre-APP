@@ -1,7 +1,8 @@
+import * as Crypto from 'expo-crypto';
 import type { CompraFinalizada, Item, ItemCompra, ListaSalva, SessaoCompra } from '@/types';
 
 export function gerarId() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  return Crypto.randomUUID();
 }
 
 export function criarSessaoCompra(lista: ListaSalva): SessaoCompra {
