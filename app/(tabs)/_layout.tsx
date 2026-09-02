@@ -47,5 +47,5 @@ const styles = StyleSheet.create({
   label: { fontFamily: fonts.semibold, fontSize: 10 },
   icon: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 22, textAlign: 'center', minWidth: 24 },
   purchaseIcon: { fontFamily: fonts.semibold, fontSize: 20, lineHeight: 22 },
-  historyIcon: { fontSize: 26, lineHeight: 26 },
+  historyIcon: { fontSize: 32, lineHeight: 32 },
 });
