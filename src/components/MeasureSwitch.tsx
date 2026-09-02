@@ -13,10 +13,10 @@ type MeasureSwitchProps = {
 
 export function MeasureSwitch({ value, onChange, compact = false, showLabel = true }: MeasureSwitchProps) {
   const position = useRef(new Animated.Value(value === 'Kg' ? 1 : 0)).current;
-  const width = compact ? 82 : 96;
+  const width = compact ? 64 : 96;
   const height = compact ? 44 : 50;
-  const padding = 4;
-  const thumbSize = compact ? 32 : 38;
+  const padding = compact ? 3 : 4;
+  const thumbSize = compact ? 30 : 38;
   const travel = width - (padding * 2) - thumbSize - 4;
 
   useEffect(() => {
@@ -84,6 +84,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emoji: { fontSize: 19, lineHeight: 23 },
-  emojiCompact: { fontSize: 16, lineHeight: 20 },
+  emojiCompact: { fontSize: 14, lineHeight: 18 },
   pressed: { opacity: 0.88 },
 });
