@@ -11,13 +11,13 @@ const steps = [
 
 export default function HomeTab() {
   const { name } = useAuth(); const { data, status } = useCloud();
-  return <Screen scroll={false}><View style={styles.content}><Brand compact /><AppText style={styles.greeting}>Olá{name ? `, ${name.split(' ')[0]}` : ''}.</AppText><View style={styles.steps}>{steps.map((step) => <Pressable key={step.title} accessibilityRole="button" accessibilityLabel={step.title} onPress={step.action} style={({ pressed }) => [pressed && styles.pressed]}><Card style={styles.step}><View style={styles.iconSlot}><View style={styles.icon}><AppText style={styles.iconText}>{step.icon}</AppText></View></View><AppText style={styles.title}>{step.title}</AppText><View style={styles.arrowSlot}><AppText style={styles.arrow}>›</AppText></View></Card></Pressable>)}</View><Card style={styles.summary}><AppText style={styles.summaryTitle}>Resumo rápido</AppText><View style={styles.summaryRow}><Summary value={data.historico.length} label="listas" /><Summary value={data.compras.length} label="compras" /><Summary value={status === 'ready' ? '✓' : '…'} label="nuvem" /></View></Card></View></Screen>;
+  return <Screen scroll={false}><View style={styles.content}><Brand compact /><AppText style={styles.greeting}>Olá{name ? `, ${name.split(' ')[0]}` : ''}.</AppText><View style={styles.steps}>{steps.map((step, index) => <View key={step.title}><Pressable accessibilityRole="button" accessibilityLabel={step.title} onPress={step.action} style={({ pressed }) => [pressed && styles.pressed]}><Card style={styles.step}><View style={styles.iconSlot}><View style={styles.icon}><AppText style={styles.iconText}>{step.icon}</AppText></View></View><AppText style={styles.title}>{step.title}</AppText><View style={styles.arrowSlot}><AppText style={styles.arrow}>›</AppText></View></Card></Pressable>{index < steps.length - 1 ? <AppText style={styles.down}>↓</AppText> : null}</View>)}</View><Card style={styles.summary}><AppText style={styles.summaryTitle}>Resumo rápido</AppText><View style={styles.summaryRow}><Summary value={data.historico.length} label="listas" /><Summary value={data.compras.length} label="compras" /><Summary value={status === 'ready' ? '✓' : '…'} label="nuvem" /></View></Card></View></Screen>;
 }
 function Summary({ value, label }: { value: number | string; label: string }) { return <View style={styles.summaryItem}><AppText style={styles.summaryValue}>{value}</AppText><AppText style={styles.summaryLabel}>{label}</AppText></View>; }
 const styles = StyleSheet.create({
   content: { width: '100%' },
-  greeting: { fontFamily: fonts.black, fontSize: 26, marginBottom: 12 },
-  steps: { gap: 8 },
+  greeting: { fontFamily: fonts.black, fontSize: 26, marginBottom: 10 },
+  steps: { gap: 0 },
   step: { flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 10 },
   iconSlot: { width: 42, alignItems: 'flex-start' },
   icon: { width: 38, height: 38, borderRadius: radii.md, backgroundColor: colors.softOrange, alignItems: 'center', justifyContent: 'center' },
@@ -25,8 +25,9 @@ const styles = StyleSheet.create({
   title: { flex: 1, textAlign: 'center', fontFamily: fonts.bold, fontSize: 15 },
   arrowSlot: { width: 42, alignItems: 'flex-end' },
   arrow: { fontFamily: fonts.bold, fontSize: 25, lineHeight: 25 },
+  down: { textAlign: 'center', fontFamily: fonts.black, color: colors.orange, fontSize: 24, lineHeight: 19, marginVertical: 0 },
   pressed: { opacity: 0.86, transform: [{ scale: 0.99 }] },
-  summary: { marginTop: 12, paddingVertical: 10 },
+  summary: { marginTop: 10, paddingVertical: 10 },
   summaryTitle: { fontFamily: fonts.bold, fontSize: 13, marginBottom: 7 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-around' },
   summaryItem: { alignItems: 'center' },
