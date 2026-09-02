@@ -4,7 +4,7 @@ import { AppText } from '@/components/AppText';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, fonts } from '@/theme';
 
-const icons: Record<string, string> = { home: '⌂', listas: '☷', comprar: '🛒', historico: '◷' };
+const icons: Record<string, string> = { home: '⌂', listas: '☷', comprar: '$', historico: '◷' };
 
 export default function TabsLayout() {
   const { loading, user } = useAuth();
@@ -19,7 +19,11 @@ export default function TabsLayout() {
       tabBarLabelStyle: styles.label,
       tabBarStyle: styles.bar,
       tabBarHideOnKeyboard: true,
-      tabBarIcon: ({ color }) => <AppText style={[styles.icon, { color }]}>{icons[route.name] ?? '•'}</AppText>,
+      tabBarIcon: ({ color }) => (
+        <AppText style={[styles.icon, route.name === 'historico' && styles.historyIcon, { color }]}>
+          {icons[route.name] ?? '•'}
+        </AppText>
+      ),
     })}>
       <Tabs.Screen name="home" options={{ title: 'Início' }} />
       <Tabs.Screen name="listas" options={{ title: 'Listas' }} />
@@ -34,5 +38,6 @@ const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.blue },
   bar: { height: 70, paddingTop: 7, paddingBottom: 8, borderTopWidth: 2, borderTopColor: colors.navy, backgroundColor: colors.white },
   label: { fontFamily: fonts.semibold, fontSize: 10 },
-  icon: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 22 },
+  icon: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 22, textAlign: 'center', minWidth: 24 },
+  historyIcon: { fontSize: 22, lineHeight: 22 },
 });
