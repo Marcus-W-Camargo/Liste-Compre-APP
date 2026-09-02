@@ -1,6 +1,6 @@
-import { useMemo, type PropsWithChildren } from 'react';
-import { Keyboard, KeyboardAvoidingView, PanResponder, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { router, usePathname } from 'expo-router';
+import { useCallback, useMemo, useRef, type PropsWithChildren } from 'react';
+import { Animated, Easing, Keyboard, KeyboardAvoidingView, PanResponder, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { router, useFocusEffect, usePathname } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/theme';
 
@@ -19,6 +19,9 @@ const TAB_ROUTES = [
 const TAB_NAMES = ['home', 'listas', 'comprar', 'historico'] as const;
 const SWIPE_DISTANCE = 64;
 const SWIPE_AXIS_RATIO = 1.25;
+const TRANSITION_DISTANCE = 22;
+const TRANSITION_DURATION = 190;
+let lastFocusedTabIndex = -1;
 
 function getTabIndex(pathname: string) {
   const segment = pathname.split('/').filter(Boolean).at(-1);
@@ -28,6 +31,51 @@ function getTabIndex(pathname: string) {
 export function Screen({ children, scroll = true, padded = true }: ScreenProps) {
   const pathname = usePathname();
   const tabIndex = getTabIndex(pathname);
+  const transitionX = useRef(new Animated.Value(0)).current;
+  const transitionOpacity = useRef(new Animated.Value(1)).current;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (tabIndex < 0) {
+        transitionX.setValue(0);
+        transitionOpacity.setValue(1);
+        return;
+      }
+
+      const previousIndex = lastFocusedTabIndex;
+      const direction = previousIndex < 0 || previousIndex === tabIndex
+        ? 0
+        : tabIndex > previousIndex ? 1 : -1;
+      lastFocusedTabIndex = tabIndex;
+
+      transitionX.stopAnimation();
+      transitionOpacity.stopAnimation();
+
+      if (direction === 0) {
+        transitionX.setValue(0);
+        transitionOpacity.setValue(1);
+        return;
+      }
+
+      transitionX.setValue(direction * TRANSITION_DISTANCE);
+      transitionOpacity.setValue(0.94);
+
+      Animated.parallel([
+        Animated.timing(transitionX, {
+          toValue: 0,
+          duration: TRANSITION_DURATION,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(transitionOpacity, {
+          toValue: 1,
+          duration: TRANSITION_DURATION,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, [tabIndex, transitionOpacity, transitionX]),
+  );
 
   const panResponder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_event, gesture) => {
@@ -69,13 +117,15 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']} {...panResponder.panHandlers}>
       <View pointerEvents="none" style={styles.decorOne} />
       <View pointerEvents="none" style={styles.decorTwo} />
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}
-      >
-        {content}
-      </KeyboardAvoidingView>
+      <Animated.View style={[styles.flex, { opacity: transitionOpacity, transform: [{ translateX: transitionX }] }]}>
+        <KeyboardAvoidingView
+          style={styles.flex}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={0}
+        >
+          {content}
+        </KeyboardAvoidingView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
