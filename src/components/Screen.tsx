@@ -14,6 +14,7 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
       contentContainerStyle={[styles.content, padded && styles.padded]}
       keyboardShouldPersistTaps="never"
       keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+      automaticallyAdjustKeyboardInsets
       showsVerticalScrollIndicator={false}
     >
       {children}
@@ -21,11 +22,18 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
   ) : (
     <View style={[styles.content, styles.flex, padded && styles.padded]}>{children}</View>
   );
+
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <View pointerEvents="none" style={styles.decorOne} />
       <View pointerEvents="none" style={styles.decorTwo} />
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>{content}</KeyboardAvoidingView>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        {content}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
