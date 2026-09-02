@@ -17,7 +17,7 @@ function Summary({ value, label }: { value: number | string; label: string }) { 
 const styles = StyleSheet.create({
   content: { flex: 1, width: '100%' },
   greeting: { fontFamily: fonts.black, fontSize: 26, marginBottom: 16 },
-  steps: { marginTop: 12 },
+  steps: { marginTop: 30 },
   step: { minHeight: 74, alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 11 },
   icon: { width: 34, height: 34, borderRadius: radii.md, backgroundColor: colors.softOrange, alignItems: 'center', justifyContent: 'center' },
   iconText: { fontSize: 20 },
