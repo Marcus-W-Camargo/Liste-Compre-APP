@@ -1,8 +1,22 @@
-import { Redirect, Tabs } from 'expo-router';
+import { Redirect, withLayoutContext } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import type { ParamListBase, TabNavigationState } from '@react-navigation/native';
+import {
+  createMaterialTopTabNavigator,
+  type MaterialTopTabNavigationEventMap,
+  type MaterialTopTabNavigationOptions,
+} from '@react-navigation/material-top-tabs';
 import { AppText } from '@/components/AppText';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, fonts } from '@/theme';
+
+const { Navigator } = createMaterialTopTabNavigator();
+const SwipeTabs = withLayoutContext<
+  MaterialTopTabNavigationOptions,
+  typeof Navigator,
+  TabNavigationState<ParamListBase>,
+  MaterialTopTabNavigationEventMap
+>(Navigator);
 
 const icons: Record<string, string> = { home: '⌂', listas: '☷', comprar: '$', historico: '◷' };
 
@@ -12,40 +26,49 @@ export default function TabsLayout() {
   if (!user) return <Redirect href="/login" />;
 
   return (
-    <Tabs screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarActiveTintColor: colors.orange,
-      tabBarInactiveTintColor: colors.muted,
-      tabBarLabelStyle: styles.label,
-      tabBarStyle: styles.bar,
-      tabBarHideOnKeyboard: true,
-      tabBarIcon: ({ color }) => (
-        <AppText
-          style={[
-            styles.icon,
-            route.name === 'comprar' && styles.purchaseIcon,
-            route.name === 'historico' && styles.historyIcon,
-            { color },
-          ]}
-        >
-          {icons[route.name] ?? '•'}
-        </AppText>
-      ),
-    })}>
-      <Tabs.Screen name="home" options={{ title: 'Início' }} />
-      <Tabs.Screen name="listas" options={{ title: 'Listas' }} />
-      <Tabs.Screen name="comprar" options={{ title: 'Comprar' }} />
-      <Tabs.Screen name="historico" options={{ title: 'Histórico' }} />
-      <Tabs.Screen name="conta" options={{ href: null }} />
-    </Tabs>
+    <SwipeTabs
+      initialRouteName="home"
+      tabBarPosition="bottom"
+      screenOptions={({ route }) => ({
+        swipeEnabled: true,
+        animationEnabled: true,
+        tabBarShowIcon: true,
+        tabBarActiveTintColor: colors.orange,
+        tabBarInactiveTintColor: colors.muted,
+        tabBarPressColor: 'rgba(247,80,27,0.10)',
+        tabBarIndicatorStyle: styles.indicator,
+        tabBarLabelStyle: styles.label,
+        tabBarStyle: styles.bar,
+        tabBarItemStyle: styles.item,
+        tabBarIcon: ({ color }) => (
+          <AppText
+            style={[
+              styles.icon,
+              route.name === 'comprar' && styles.purchaseIcon,
+              route.name === 'historico' && styles.historyIcon,
+              { color },
+            ]}
+          >
+            {icons[route.name] ?? '•'}
+          </AppText>
+        ),
+      })}
+    >
+      <SwipeTabs.Screen name="home" options={{ title: 'Início' }} />
+      <SwipeTabs.Screen name="listas" options={{ title: 'Listas' }} />
+      <SwipeTabs.Screen name="comprar" options={{ title: 'Comprar' }} />
+      <SwipeTabs.Screen name="historico" options={{ title: 'Histórico' }} />
+    </SwipeTabs>
   );
 }
 
 const styles = StyleSheet.create({
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.blue },
-  bar: { height: 70, paddingTop: 7, paddingBottom: 8, borderTopWidth: 2, borderTopColor: colors.navy, backgroundColor: colors.white },
-  label: { fontFamily: fonts.semibold, fontSize: 10 },
-  icon: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 22, textAlign: 'center', minWidth: 24 },
+  bar: { height: 70, paddingTop: 4, paddingBottom: 4, borderTopWidth: 2, borderTopColor: colors.navy, backgroundColor: colors.white, elevation: 0 },
+  item: { minHeight: 60, paddingVertical: 2 },
+  indicator: { height: 0 },
+  label: { fontFamily: fonts.semibold, fontSize: 10, textTransform: 'none', margin: 0 },
+  icon: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 22, textAlign: 'center', minWidth: 24, marginBottom: 1 },
   purchaseIcon: { fontFamily: fonts.semibold, fontSize: 20, lineHeight: 22 },
-  historyIcon: { fontSize: 32, lineHeight: 32 },
+  historyIcon: { fontSize: 30, lineHeight: 30 },
 });
