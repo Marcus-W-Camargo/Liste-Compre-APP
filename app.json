@@ -6,10 +6,8 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "android": {
-      "package": "com.marcuscamargo.listecompre",
-      "edgeToEdgeEnabled": true
+      "package": "com.marcuscamargo.listecompre"
     },
     "ios": {
       "bundleIdentifier": "com.marcuscamargo.listecompre",
