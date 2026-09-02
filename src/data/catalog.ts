@@ -1,0 +1,15 @@
+const PRODUTOS = [
+  'Arroz Branco Agulhinha','Arroz Integral','Arroz Parboilizado','Feijão Carioca','Feijão Preto','Feijão Fradinho','Lentilha','Grão-de-Bico','Farinha de Trigo','Farinha de Mandioca','Fubá','Macarrão Espaguete','Macarrão Penne','Macarrão Parafuso','Pão Francês','Pão de Forma','Pão Integral','Pão de Queijo','Banana Prata','Banana Nanica','Banana da Terra','Laranja Pera','Laranja Bahia','Limão Taiti','Limão Siciliano','Maçã Gala','Maçã Fuji','Maçã Verde','Abacaxi','Morango','Kiwi','Abacate','Manga Palmer','Mamão Formosa','Mamão Papaia','Melancia','Melão Amarelo','Uva Itália','Uva Thompson','Pera','Tomate Italiano','Tomate Cereja','Alface Crespa','Alface Americana','Rúcula','Agrião','Couve','Brócolis','Batata Inglesa','Batata Doce','Mandioca','Cenoura','Beterraba','Abobrinha Italiana','Abóbora Cabotiá','Chuchu','Berinjela','Pimentão Verde','Pimentão Vermelho','Pepino Japonês','Quiabo','Vagem','Cebola Branca','Cebola Roxa','Alho','Salsinha','Cebolinha','Coentro','Picanha','Alcatra','Maminha','Filé Mignon','Contrafilé','Fraldinha','Coxão Mole','Patinho','Acém','Costela','Cupim','Carne Moída','Carne Seca','Carne de Sol','Lombo Suíno','Pernil','Costela Suína','Linguiça Calabresa','Linguiça Toscana','Bacon','Peito de Frango','Coxa de Frango','Sobrecoxa de Frango','Asa de Frango','Frango Inteiro','Filé de Frango','Tilápia','Salmão','Bacalhau','Merluza','Sardinha','Atum','Camarão','Leite Integral','Leite Desnatado','Leite Zero Lactose','Leite em Pó Integral','Leite Condensado','Creme de Leite','Queijo Minas Frescal','Mussarela','Queijo Prato','Queijo Coalho','Queijo Parmesão','Ricota','Cream Cheese','Requeijão','Iogurte Natural','Iogurte Grego','Manteiga','Margarina','Óleo de Soja','Azeite de Oliva Extra Virgem','Açúcar Refinado','Açúcar Cristal','Açúcar Mascavo','Sal Refinado','Café Torrado e Moído','Café Solúvel','Achocolatado','Chocolate em Pó','Biscoito Cream Cracker','Biscoito Maisena','Bolacha Recheada','Molho de Tomate','Extrato de Tomate','Milho Verde em Conserva','Ervilha em Conserva','Atum em Lata','Sardinha em Lata','Maionese','Ketchup','Mostarda','Vinagre','Leite de Coco','Coco Ralado','Fermento em Pó','Ovos','Água Mineral','Água com Gás','Refrigerante Cola','Refrigerante Guaraná','Suco de Laranja','Suco de Uva','Água de Coco','Detergente','Sabão em Pó','Sabão Líquido','Amaciante','Água Sanitária','Desinfetante','Limpador Multiuso','Esponja de Cozinha','Saco de Lixo','Papel Toalha','Papel Higiênico','Sabonete','Shampoo','Condicionador','Creme Dental','Escova de Dentes','Fio Dental','Desodorante','Absorvente','Algodão'
+] as const;
+
+function normalizar(value: string) {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+export function sugerirProdutos(query: string, limite = 8) {
+  const needle = normalizar(query.trim());
+  if (needle.length < 3) return [];
+  return PRODUTOS.filter((produto) => normalizar(produto).startsWith(needle)).slice(0, limite);
+}
+
+export const TOTAL_CATALOGO_EMBUTIDO = PRODUTOS.length;

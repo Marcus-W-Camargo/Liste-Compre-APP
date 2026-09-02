@@ -1,0 +1,7 @@
+{
+  "plugins": ["react", "typescript"],
+  "rules": {
+    "no-debugger": "error",
+    "no-console": "warn"
+  }
+}

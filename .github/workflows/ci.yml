@@ -1,0 +1,37 @@
+name: Mobile CI
+
+on:
+  push:
+    branches: [main, feat/mobile-app-v1]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Unit tests
+        run: npm test
+      - name: Expo Doctor
+        run: npm run doctor
+      - name: Android JS bundle
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: https://fwrysuahhxvncwnvamze.supabase.co
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_placeholder
+          EXPO_PUBLIC_WEB_API_URL: https://listeecompre.vercel.app
+        run: npm run export:android
