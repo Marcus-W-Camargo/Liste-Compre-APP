@@ -23,13 +23,7 @@ jobs:
       - name: Sync official product catalog
         run: |
           npm run catalog:sync
-          if ! git diff --quiet -- src/data/produtosMercado.json || [ -n "$(git ls-files --others --exclude-standard src/data/produtosMercado.json)" ]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add src/data/produtosMercado.json
-            git commit -m "chore: sincroniza catálogo oficial [skip ci]"
-            git push origin HEAD:${GITHUB_REF_NAME}
-          fi
+          git diff --exit-code -- src/data/produtosMercado.json
       - name: TypeScript
         env:
           GH_TOKEN: ${{ github.token }}
@@ -40,18 +34,26 @@ jobs:
           status=$?
           printf '%s\n' "$output"
           if [ "$status" -ne 0 ]; then
-            {
-              printf '### Diagnóstico automático do TypeScript\n\n```text\n'
-              printf '%s\n' "$output" | head -c 50000
-              printf '\n```\n'
-            } > /tmp/ts-diagnostic.md
-            gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@/tmp/ts-diagnostic.md || true
+            { printf '### Diagnóstico automático do TypeScript\n\n```text\n'; printf '%s\n' "$output" | head -c 50000; printf '\n```\n'; } > /tmp/diagnostic.md
+            gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@/tmp/diagnostic.md || true
             exit "$status"
           fi
       - name: Lint
         run: npm run lint
       - name: Unit tests
-        run: npm test
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set +e
+          output="$(npm test 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            { printf '### Diagnóstico automático dos testes\n\n```text\n'; printf '%s\n' "$output" | head -c 50000; printf '\n```\n'; } > /tmp/diagnostic.md
+            gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@/tmp/diagnostic.md || true
+            exit "$status"
+          fi
       - name: Expo Doctor
         run: npm run doctor
       - name: Android JS bundle
