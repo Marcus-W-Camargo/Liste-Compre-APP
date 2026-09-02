@@ -17,10 +17,11 @@ const TAB_ROUTES = [
 ] as const;
 
 const TAB_NAMES = ['home', 'listas', 'comprar', 'historico'] as const;
-const SWIPE_DISTANCE = 64;
+const SWIPE_TRIGGER_DISTANCE = 42;
 const SWIPE_AXIS_RATIO = 1.25;
-const TRANSITION_DISTANCE = 22;
-const TRANSITION_DURATION = 190;
+const DRAG_LIMIT = 88;
+const TRANSITION_DISTANCE = 72;
+const TRANSITION_DURATION = 220;
 let lastFocusedTabIndex = -1;
 
 function getTabIndex(pathname: string) {
@@ -33,6 +34,7 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
   const tabIndex = getTabIndex(pathname);
   const transitionX = useRef(new Animated.Value(0)).current;
   const transitionOpacity = useRef(new Animated.Value(1)).current;
+  const swipeCommitted = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -58,22 +60,14 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
       }
 
       transitionX.setValue(direction * TRANSITION_DISTANCE);
-      transitionOpacity.setValue(0.94);
+      transitionOpacity.setValue(1);
 
-      Animated.parallel([
-        Animated.timing(transitionX, {
-          toValue: 0,
-          duration: TRANSITION_DURATION,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(transitionOpacity, {
-          toValue: 1,
-          duration: TRANSITION_DURATION,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.timing(transitionX, {
+        toValue: 0,
+        duration: TRANSITION_DURATION,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
     }, [tabIndex, transitionOpacity, transitionX]),
   );
 
@@ -82,22 +76,52 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
       if (tabIndex < 0) return false;
       const horizontal = Math.abs(gesture.dx);
       const vertical = Math.abs(gesture.dy);
-      return horizontal > 18 && horizontal > vertical * SWIPE_AXIS_RATIO;
+      return horizontal > 12 && horizontal > vertical * SWIPE_AXIS_RATIO;
     },
-    onPanResponderRelease: (_event, gesture) => {
-      if (tabIndex < 0) return;
+    onPanResponderGrant: () => {
+      swipeCommitted.current = false;
+      transitionX.stopAnimation();
+    },
+    onPanResponderMove: (_event, gesture) => {
+      if (tabIndex < 0 || swipeCommitted.current) return;
+
       const horizontal = Math.abs(gesture.dx);
       const vertical = Math.abs(gesture.dy);
-      if (horizontal < SWIPE_DISTANCE || horizontal <= vertical * SWIPE_AXIS_RATIO) return;
+      if (horizontal <= vertical * SWIPE_AXIS_RATIO) return;
 
       const nextIndex = gesture.dx < 0 ? tabIndex + 1 : tabIndex - 1;
-      if (nextIndex < 0 || nextIndex >= TAB_ROUTES.length) return;
+      const canNavigate = nextIndex >= 0 && nextIndex < TAB_ROUTES.length;
+      const resistance = canNavigate ? 1 : 0.28;
+      const drag = Math.max(-DRAG_LIMIT, Math.min(DRAG_LIMIT, gesture.dx * resistance));
+      transitionX.setValue(drag);
 
+      if (!canNavigate || horizontal < SWIPE_TRIGGER_DISTANCE) return;
+
+      swipeCommitted.current = true;
       Keyboard.dismiss();
+      lastFocusedTabIndex = tabIndex;
       router.navigate(TAB_ROUTES[nextIndex]);
     },
+    onPanResponderRelease: () => {
+      if (swipeCommitted.current) return;
+      Animated.timing(transitionX, {
+        toValue: 0,
+        duration: 140,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    },
+    onPanResponderTerminate: () => {
+      if (swipeCommitted.current) return;
+      Animated.timing(transitionX, {
+        toValue: 0,
+        duration: 140,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    },
     onPanResponderTerminationRequest: () => true,
-  }), [tabIndex]);
+  }), [tabIndex, transitionX]);
 
   const content = scroll ? (
     <ScrollView
@@ -117,7 +141,7 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']} {...panResponder.panHandlers}>
       <View pointerEvents="none" style={styles.decorOne} />
       <View pointerEvents="none" style={styles.decorTwo} />
-      <Animated.View style={[styles.flex, { opacity: transitionOpacity, transform: [{ translateX: transitionX }] }]}>
+      <Animated.View style={[styles.flex, { transform: [{ translateX: transitionX }] }]}>
         <KeyboardAvoidingView
           style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -131,7 +155,7 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.blue }, flex: { flex: 1 },
+  safe: { flex: 1, backgroundColor: colors.blue, overflow: 'hidden' }, flex: { flex: 1 },
   content: { width: '100%', maxWidth: 720, alignSelf: 'center', paddingBottom: 36 }, padded: { paddingHorizontal: 16, paddingTop: 14 },
   decorOne: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(255,255,255,0.10)', top: -90, right: -70 },
   decorTwo: { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(247,80,27,0.10)', bottom: 100, left: -70 },
