@@ -32,7 +32,7 @@ export function Field({ label, error, style, secureTextEntry, ...props }: FieldP
             onPress={() => setPasswordVisible((visible) => !visible)}
             style={({ pressed }) => [styles.passwordToggle, pressed ? styles.passwordTogglePressed : undefined]}
           >
-            <AppText style={styles.passwordToggleIcon}>{passwordVisible ? '👁️' : '🙈'}</AppText>
+            <AppText style={styles.passwordToggleIcon}>{passwordVisible ? '🙈' : '👁️'}</AppText>
           </Pressable>
         ) : null}
       </View>
