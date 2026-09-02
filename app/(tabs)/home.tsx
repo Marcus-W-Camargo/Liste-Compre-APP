@@ -1,8 +1,13 @@
 import { useCallback, useState } from 'react';
 import { router, useFocusEffect } from 'expo-router';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { Screen } from '@/components/Screen'; import { Card } from '@/components/Card'; import { AppText } from '@/components/AppText';
-import { useAuth } from '@/providers/AuthProvider'; import { useCloud } from '@/providers/CloudProvider'; import { obterFotoPerfil } from '@/lib/profilePhoto'; import { colors, fonts, radii } from '@/theme';
+import { Screen } from '@/components/Screen';
+import { Card } from '@/components/Card';
+import { AppText } from '@/components/AppText';
+import { useAuth } from '@/providers/AuthProvider';
+import { useCloud } from '@/providers/CloudProvider';
+import { obterFotoPerfil } from '@/lib/profilePhoto';
+import { colors, fonts, radii } from '@/theme';
 
 const steps = [
   { icon: '📝', title: 'Crie sua lista', action: () => router.push('/lista') },
@@ -11,26 +16,126 @@ const steps = [
 ];
 
 export default function HomeTab() {
-  const { user, name } = useAuth(); const { data, status } = useCloud(); const [photo, setPhoto] = useState<string | null>(null);
-  useFocusEffect(useCallback(() => { let active = true; if (!user?.id) { setPhoto(null); return () => { active = false; }; } void obterFotoPerfil(user.id).then((url) => { if (active) setPhoto(url); }).catch(() => { if (active) setPhoto(null); }); return () => { active = false; }; }, [user?.id]));
-  return <Screen scroll={false}><View style={styles.content}><View style={styles.topRow}><Image accessibilityLabel="Liste & Compre" source={require('../../src/assets/ListeLogo.png')} style={styles.logo} resizeMode="contain" /><Pressable accessibilityRole="button" accessibilityLabel="Minha conta" onPress={() => router.push('/(tabs)/conta')} style={({ pressed }) => [styles.accountButton, pressed && styles.accountPressed]}>{photo ? <Image source={{ uri: photo }} style={styles.accountPhoto} /> : <AppText style={styles.accountFallback}>👤</AppText>}</Pressable></View><AppText style={styles.greeting}>Olá{name ? `, ${name.split(' ')[0]}` : ''}.</AppText><View style={styles.steps}>{steps.map((step, index) => <View key={step.title}><Pressable accessibilityRole="button" accessibilityLabel={step.title} onPress={step.action} style={({ pressed }) => [pressed && styles.pressed]}><Card style={styles.step}><View style={styles.icon}><AppText style={styles.iconText}>{step.icon}</AppText></View><AppText style={styles.title}>{step.title}</AppText></Card></Pressable>{index < steps.length - 1 ? <AppText style={styles.down}>↓</AppText> : null}</View>)}</View><Card style={styles.summary}><AppText style={styles.summaryTitle}>Resumo rápido</AppText><View style={styles.summaryRow}><Summary value={data.historico.length} label="listas" /><Summary value={data.compras.length} label="compras" /><Summary value={status === 'ready' ? '✓' : '…'} label="nuvem" /></View></Card></View></Screen>;
+  const { user, name } = useAuth();
+  const { data, status } = useCloud();
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      if (!user?.id) {
+        setPhoto(null);
+        return () => {
+          active = false;
+        };
+      }
+
+      void obterFotoPerfil(user.id)
+        .then((url) => {
+          if (active) setPhoto(url);
+        })
+        .catch(() => {
+          if (active) setPhoto(null);
+        });
+
+      return () => {
+        active = false;
+      };
+    }, [user?.id]),
+  );
+
+  return (
+    <Screen scroll={false}>
+      <View style={styles.content}>
+        <View style={styles.topRow}>
+          <Image
+            accessibilityLabel="Liste & Compre"
+            source={require('../../src/assets/ListeLogo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+
+          <View style={styles.accountArea}>
+            <AppText numberOfLines={1} style={styles.greeting}>
+              Olá{name ? `, ${name.split(' ')[0]}` : ''}
+            </AppText>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Minha conta"
+              onPress={() => router.push('/(tabs)/conta')}
+              style={({ pressed }) => [styles.accountButton, pressed && styles.accountPressed]}
+            >
+              {photo ? (
+                <Image source={{ uri: photo }} style={styles.accountPhoto} />
+              ) : (
+                <AppText style={styles.accountFallback}>👤</AppText>
+              )}
+            </Pressable>
+          </View>
+        </View>
+
+        <AppText style={styles.question}>Por onde começamos?</AppText>
+
+        <View style={styles.steps}>
+          {steps.map((step, index) => (
+            <View key={step.title}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={step.title}
+                onPress={step.action}
+                style={({ pressed }) => [pressed && styles.pressed]}
+              >
+                <Card style={styles.step}>
+                  <View style={styles.icon}>
+                    <AppText style={styles.iconText}>{step.icon}</AppText>
+                  </View>
+                  <AppText style={styles.title}>{step.title}</AppText>
+                </Card>
+              </Pressable>
+              {index < steps.length - 1 ? <AppText style={styles.down}>↓</AppText> : null}
+            </View>
+          ))}
+        </View>
+
+        <Card style={styles.summary}>
+          <AppText style={styles.summaryTitle}>Resumo rápido</AppText>
+          <View style={styles.summaryRow}>
+            <Summary value={data.historico.length} label="listas" />
+            <Summary value={data.compras.length} label="compras" />
+            <Summary value={status === 'ready' ? '✓' : '…'} label="nuvem" />
+          </View>
+        </Card>
+      </View>
+    </Screen>
+  );
 }
-function Summary({ value, label }: { value: number | string; label: string }) { return <View style={styles.summaryItem}><AppText style={styles.summaryValue}>{value}</AppText><AppText style={styles.summaryLabel}>{label}</AppText></View>; }
+
+function Summary({ value, label }: { value: number | string; label: string }) {
+  return (
+    <View style={styles.summaryItem}>
+      <AppText style={styles.summaryValue}>{value}</AppText>
+      <AppText style={styles.summaryLabel}>{label}</AppText>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   content: { flex: 1, width: '100%' },
-  topRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 4 },
+  topRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 4 },
   logo: { width: 150, height: 84 },
-  accountButton: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, borderColor: colors.navy, backgroundColor: colors.cream, alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginTop: 8 },
+  accountArea: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8, flex: 1 },
+  greeting: { fontFamily: fonts.bold, fontSize: 13, textAlign: 'right', flexShrink: 1 },
+  accountButton: { width: 48, height: 48, borderRadius: 24, borderWidth: 3, borderColor: colors.navy, backgroundColor: colors.cream, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   accountPhoto: { width: '100%', height: '100%' },
   accountFallback: { fontSize: 24 },
   accountPressed: { opacity: 0.82, transform: [{ scale: 0.97 }] },
-  greeting: { fontFamily: fonts.black, fontSize: 26, marginBottom: 16 },
-  steps: { marginTop: 30 },
+  question: { textAlign: 'center', fontFamily: fonts.black, fontSize: 21, marginTop: 4, marginBottom: 10 },
+  steps: { marginTop: 6 },
   step: { minHeight: 74, alignItems: 'center', justifyContent: 'center', gap: 4, paddingVertical: 11 },
   icon: { width: 34, height: 34, borderRadius: radii.md, backgroundColor: colors.softOrange, alignItems: 'center', justifyContent: 'center' },
   iconText: { fontSize: 20 },
   title: { textAlign: 'center', fontFamily: fonts.bold, fontSize: 15 },
-  down: { textAlign: 'center', fontFamily: fonts.black, color: colors.orange, fontSize: 24, lineHeight: 18, marginVertical: 1 },
+  down: { textAlign: 'center', fontFamily: fonts.black, color: colors.orange, fontSize: 24, lineHeight: 22, marginTop: -3, marginBottom: 1 },
   pressed: { opacity: 0.86, transform: [{ scale: 0.99 }] },
   summary: { marginTop: 'auto', paddingVertical: 10, marginBottom: 2, transform: [{ translateY: 30 }] },
   summaryTitle: { fontFamily: fonts.bold, fontSize: 13, marginBottom: 7 },
