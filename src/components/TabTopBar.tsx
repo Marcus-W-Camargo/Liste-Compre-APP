@@ -63,7 +63,7 @@ export function TabTopBar({ showGreeting = false, photoUri }: TabTopBarProps) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Minha conta"
-          onPress={() => router.push('/(tabs)/conta')}
+          onPress={() => router.push('/conta')}
           style={({ pressed }) => [styles.accountButton, pressed && styles.accountPressed]}
         >
           {photo ? (
