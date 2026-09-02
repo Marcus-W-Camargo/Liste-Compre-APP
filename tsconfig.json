@@ -5,9 +5,8 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "resolveJsonModule": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "types": ["node"],
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["app/**/*.ts", "app/**/*.tsx", "src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

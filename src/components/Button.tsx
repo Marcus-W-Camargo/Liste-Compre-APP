@@ -15,23 +15,15 @@ export function Button({ label, variant = 'primary', loading = false, disabled, 
       accessibilityRole="button"
       {...props}
       disabled={isDisabled}
-      style={({ pressed }) => [styles.base, styles[variant], isDisabled && styles.disabled, pressed && !isDisabled && styles.pressed, typeof style === 'function' ? style({ pressed }) : style]}
+      style={(state) => [styles.base, styles[variant], isDisabled && styles.disabled, state.pressed && !isDisabled && styles.pressed, typeof style === 'function' ? style(state) : style]}
     >
-      {loading ? <ActivityIndicator color={variant === 'secondary' || variant === 'ghost' ? colors.navy : colors.white} /> : (
-        <AppText style={[styles.label, (variant === 'secondary' || variant === 'ghost') && styles.darkLabel]}>{label}</AppText>
-      )}
+      {loading ? <ActivityIndicator color={variant === 'secondary' || variant === 'ghost' ? colors.navy : colors.white} /> : <AppText style={[styles.label, (variant === 'secondary' || variant === 'ghost') && styles.darkLabel]}>{label}</AppText>}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: { minHeight: 50, borderWidth: 2, borderColor: colors.navy, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 18, paddingVertical: 12 },
-  primary: { backgroundColor: colors.orange },
-  secondary: { backgroundColor: colors.white },
-  danger: { backgroundColor: colors.danger },
-  ghost: { backgroundColor: 'transparent', borderColor: 'transparent' },
-  label: { color: colors.white, fontFamily: fonts.bold, fontSize: 15, textAlign: 'center' },
-  darkLabel: { color: colors.navy },
-  disabled: { opacity: 0.48 },
-  pressed: { transform: [{ scale: 0.985 }] },
+  primary: { backgroundColor: colors.orange }, secondary: { backgroundColor: colors.white }, danger: { backgroundColor: colors.danger }, ghost: { backgroundColor: 'transparent', borderColor: 'transparent' },
+  label: { color: colors.white, fontFamily: fonts.bold, fontSize: 15, textAlign: 'center' }, darkLabel: { color: colors.navy }, disabled: { opacity: 0.48 }, pressed: { transform: [{ scale: 0.985 }] },
 });
