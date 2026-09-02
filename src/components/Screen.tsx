@@ -1,4 +1,5 @@
 import type { PropsWithChildren } from 'react';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/theme';
@@ -6,15 +7,16 @@ import { colors } from '@/theme';
 type ScreenProps = PropsWithChildren<{
   scroll?: boolean;
   padded?: boolean;
+  contentStyle?: StyleProp<ViewStyle>;
 }>;
 
-export function Screen({ children, scroll = true, padded = true }: ScreenProps) {
+export function Screen({ children, scroll = true, padded = true, contentStyle }: ScreenProps) {
   const content = scroll ? (
-    <ScrollView contentContainerStyle={[styles.content, padded && styles.padded]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <ScrollView contentContainerStyle={[styles.content, padded && styles.padded, contentStyle]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
       {children}
     </ScrollView>
   ) : (
-    <View style={[styles.content, styles.flex, padded && styles.padded]}>{children}</View>
+    <View style={[styles.content, styles.flex, padded && styles.padded, contentStyle]}>{children}</View>
   );
   return (
     <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
