@@ -10,7 +10,12 @@ type ScreenProps = PropsWithChildren<{
 
 export function Screen({ children, scroll = true, padded = true }: ScreenProps) {
   const content = scroll ? (
-    <ScrollView contentContainerStyle={[styles.content, padded && styles.padded]} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <ScrollView
+      contentContainerStyle={[styles.content, padded && styles.padded]}
+      keyboardShouldPersistTaps="never"
+      keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+      showsVerticalScrollIndicator={false}
+    >
       {children}
     </ScrollView>
   ) : (
