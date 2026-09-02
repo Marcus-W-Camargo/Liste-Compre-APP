@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate:
@@ -21,7 +21,23 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
       - name: TypeScript
-        run: npm run typecheck
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set +e
+          output="$(npm run typecheck 2>&1)"
+          status=$?
+          printf '%s\n' "$output"
+          if [ "$status" -ne 0 ]; then
+            {
+              printf '### Diagnóstico automático do TypeScript\n\n```text\n'
+              printf '%s\n' "$output" | head -c 50000
+              printf '\n```\n'
+            } > /tmp/ts-diagnostic.md
+            gh api "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/comments" -F body=@/tmp/ts-diagnostic.md || true
+            exit "$status"
+          fi
       - name: Lint
         run: npm run lint
       - name: Unit tests
