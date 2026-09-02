@@ -29,15 +29,12 @@ function parseMoneyValue(value: string) {
 }
 
 function sanitizeMoneyInput(value: string) {
-  const clean = value.replace(/[^0-9,]/g, '');
-  const commaIndex = clean.indexOf(',');
-  const integerSource = commaIndex >= 0 ? clean.slice(0, commaIndex) : clean;
-  const decimalSource = commaIndex >= 0 ? clean.slice(commaIndex + 1) : '';
-  const integerDigits = integerSource.replace(/\D/g, '').slice(0, 4);
-  const decimalDigits = decimalSource.replace(/\D/g, '').slice(0, 2);
-  const integerNumber = integerDigits ? Math.min(9999, Number(integerDigits)) : 0;
-  const integerText = integerNumber.toLocaleString('pt-BR');
-  return commaIndex >= 0 ? `${integerText},${decimalDigits}` : integerText;
+  const digits = value.replace(/\D/g, '').slice(0, 6);
+  const cents = digits ? Math.min(999999, Number(digits)) : 0;
+  return (cents / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 }
 
 function formatQuantityValue(value: number, type: TipoMedida) {
@@ -213,7 +210,7 @@ function PurchaseRow({ item, onPatch, onRemove }: { item: ItemCompra; onPatch(id
   }
 
   const canCheck = item.precoUnitario > 0 && item.quantidade > 0;
-  return <Card style={[styles.row, item.pego && styles.rowDone]}><Pressable disabled={!canCheck} onPress={() => void onPatch(item.id, { pego: !item.pego })} style={[styles.check, item.pego && styles.checkDone, !canCheck && styles.checkDisabled]} accessibilityRole="checkbox" accessibilityState={{ checked: item.pego, disabled: !canCheck }}><AppText style={styles.checkText}>{item.pego ? '✓' : ''}</AppText></Pressable><View style={styles.rowBody}><View style={styles.rowHead}><View style={{ flex: 1 }}><AppText style={styles.itemName}>{item.nome}</AppText><AppText style={styles.itemMeta}>{item.categoria}{item.origem === 'extra' ? ' · Extra' : ''}</AppText></View><Pressable accessibilityLabel={`Excluir ${item.nome}`} onPress={onRemove} style={styles.delete}><AppText style={styles.deleteText}>×</AppText></Pressable></View><View style={styles.inputs}><View style={styles.priceColumn}><AppText numberOfLines={1} style={styles.inputLabel}>Preço unitário</AppText><View style={styles.moneyInput}><AppText style={styles.currencyPrefix}>R$</AppText><TextInput value={priceText} onChangeText={changePrice} onFocus={() => { if (priceText === '0,00') setPriceText(''); }} onEndEditing={commitPrice} keyboardType="decimal-pad" inputMode="decimal" placeholder="0,00" placeholderTextColor={colors.muted} style={styles.moneyTextInput} /></View></View><View style={styles.quantityColumn}><AppText numberOfLines={1} style={styles.inputLabel}>Quantidade</AppText><TextInput value={quantityText} onChangeText={changeQuantity} onEndEditing={commitQuantity} keyboardType="decimal-pad" inputMode="decimal" selectTextOnFocus={item.tipo === 'Kg'} style={styles.input} /></View><View style={styles.measureColumn}><AppText numberOfLines={1} style={styles.inputLabel}>Medida</AppText><MeasureSwitch value={item.tipo} onChange={changeMeasure} compact showLabel={false} /></View></View>{canCheck && !item.pego ? <AppText style={styles.hint}>Toque no círculo para marcar como colocado no carrinho.</AppText> : null}</View></Card>;
+  return <Card style={[styles.row, item.pego && styles.rowDone]}><Pressable disabled={!canCheck} onPress={() => void onPatch(item.id, { pego: !item.pego })} style={[styles.check, item.pego && styles.checkDone, !canCheck && styles.checkDisabled]} accessibilityRole="checkbox" accessibilityState={{ checked: item.pego, disabled: !canCheck }}><AppText style={styles.checkText}>{item.pego ? '✓' : ''}</AppText></Pressable><View style={styles.rowBody}><View style={styles.rowHead}><View style={{ flex: 1 }}><AppText style={styles.itemName}>{item.nome}</AppText><AppText style={styles.itemMeta}>{item.categoria}{item.origem === 'extra' ? ' · Extra' : ''}</AppText></View><Pressable accessibilityLabel={`Excluir ${item.nome}`} onPress={onRemove} style={styles.delete}><AppText style={styles.deleteText}>×</AppText></Pressable></View><View style={styles.inputs}><View style={styles.priceColumn}><AppText numberOfLines={1} style={styles.inputLabel}>Preço unitário</AppText><View style={styles.moneyInput}><AppText style={styles.currencyPrefix}>R$</AppText><TextInput value={priceText} onChangeText={changePrice} onEndEditing={commitPrice} keyboardType="number-pad" inputMode="numeric" selection={{ start: priceText.length, end: priceText.length }} style={styles.moneyTextInput} /></View></View><View style={styles.quantityColumn}><AppText numberOfLines={1} style={styles.inputLabel}>Quantidade</AppText><TextInput value={quantityText} onChangeText={changeQuantity} onEndEditing={commitQuantity} keyboardType="decimal-pad" inputMode="decimal" selectTextOnFocus={item.tipo === 'Kg'} style={styles.input} /></View><View style={styles.measureColumn}><AppText numberOfLines={1} style={styles.inputLabel}>Medida</AppText><MeasureSwitch value={item.tipo} onChange={changeMeasure} compact showLabel={false} /></View></View>{canCheck && !item.pego ? <AppText style={styles.hint}>Toque no círculo para marcar como colocado no carrinho.</AppText> : null}</View></Card>;
 }
 
 const styles = StyleSheet.create({
