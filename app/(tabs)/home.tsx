@@ -95,7 +95,7 @@ export default function HomeTab() {
         <AppText style={styles.gestureTitle}>Navegue do seu jeito</AppText>
         <AppText style={styles.gestureText}>Além dos botões, gestos são bem-vindos aqui.</AppText>
         <AppText style={styles.gestureSubtext}>Deslize a tela para a esquerda ou para a direita para alternar entre Início, Listas, Comprar e Histórico.</AppText>
-        <Button label="Compreendi" onPress={closeGestureTip} style={{ marginTop: 14 }} />
+        <Button label="Entendido!" onPress={closeGestureTip} style={{ marginTop: 14 }} />
       </BottomSheet>
     </Screen>
   );
