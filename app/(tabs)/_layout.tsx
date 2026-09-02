@@ -4,7 +4,7 @@ import { AppText } from '@/components/AppText';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, fonts } from '@/theme';
 
-const icons: Record<string, string> = { home: '⌂', listas: '☷', comprar: '🛒', historico: '◷', conta: '●' };
+const icons: Record<string, string> = { home: '⌂', listas: '☷', comprar: '🛒', historico: '◷' };
 
 export default function TabsLayout() {
   const { loading, user } = useAuth();
@@ -25,7 +25,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="listas" options={{ title: 'Listas' }} />
       <Tabs.Screen name="comprar" options={{ title: 'Comprar' }} />
       <Tabs.Screen name="historico" options={{ title: 'Histórico' }} />
-      <Tabs.Screen name="conta" options={{ title: 'Conta' }} />
+      <Tabs.Screen name="conta" options={{ href: null }} />
     </Tabs>
   );
 }
