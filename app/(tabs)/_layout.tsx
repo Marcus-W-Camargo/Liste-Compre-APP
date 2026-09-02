@@ -16,7 +16,6 @@ export default function TabsLayout() {
       screenOptions={({ route }) => ({
         headerShown: false,
         lazy: true,
-        freezeOnBlur: true,
         animation: 'fade',
         sceneStyle: styles.scene,
         tabBarActiveTintColor: colors.orange,
