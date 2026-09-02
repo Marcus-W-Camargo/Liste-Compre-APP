@@ -13,10 +13,10 @@ export default function TabsLayout() {
 
   return (
     <Tabs
-      detachInactiveScreens={false}
       screenOptions={({ route }) => ({
         headerShown: false,
-        lazy: false,
+        lazy: true,
+        freezeOnBlur: true,
         animation: 'fade',
         sceneStyle: styles.scene,
         tabBarActiveTintColor: colors.orange,
