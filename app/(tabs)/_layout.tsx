@@ -1,11 +1,11 @@
 import { Redirect, withLayoutContext } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import type { ParamListBase, TabNavigationState } from '@react-navigation/native';
+import type { ParamListBase, TabNavigationState } from 'expo-router/react-navigation';
 import {
   createMaterialTopTabNavigator,
   type MaterialTopTabNavigationEventMap,
   type MaterialTopTabNavigationOptions,
-} from '@react-navigation/material-top-tabs';
+} from 'expo-router/js-top-tabs';
 import { AppText } from '@/components/AppText';
 import { useAuth } from '@/providers/AuthProvider';
 import { colors, fonts } from '@/theme';
