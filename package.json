@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit",
     "lint": "oxlint app src tests scripts",
     "test": "vitest run",
-    "doctor": "npx expo-doctor@latest",
+    "doctor": "expo-doctor",
     "export:android": "expo export --platform android --output-dir dist/android",
     "check": "npm run typecheck && npm run lint && npm test && npm run export:android"
   },
@@ -43,6 +43,7 @@
   "devDependencies": {
     "@types/node": "^24.0.0",
     "@types/react": "~19.2.2",
+    "expo-doctor": "1.20.4",
     "oxlint": "^1.79.0",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11"
