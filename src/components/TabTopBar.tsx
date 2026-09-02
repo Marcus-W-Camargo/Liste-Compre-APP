@@ -1,9 +1,9 @@
-import { memo, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { AppText } from './AppText';
 import { useAuth } from '@/providers/AuthProvider';
-import { obterFotoPerfil, obterFotoPerfilEmCache } from '@/lib/profilePhoto';
+import { obterFotoPerfil } from '@/lib/profilePhoto';
 import { colors, fonts } from '@/theme';
 
 type TabTopBarProps = {
@@ -11,9 +11,9 @@ type TabTopBarProps = {
   photoUri?: string | null;
 };
 
-export const TabTopBar = memo(function TabTopBar({ showGreeting = false, photoUri }: TabTopBarProps) {
+export function TabTopBar({ showGreeting = false, photoUri }: TabTopBarProps) {
   const { user, name } = useAuth();
-  const [loadedPhoto, setLoadedPhoto] = useState<string | null>(() => user?.id ? obterFotoPerfilEmCache(user.id) : null);
+  const [loadedPhoto, setLoadedPhoto] = useState<string | null>(null);
 
   useFocusEffect(
     useCallback(() => {
@@ -27,14 +27,13 @@ export const TabTopBar = memo(function TabTopBar({ showGreeting = false, photoUr
         };
       }
 
-      const cached = obterFotoPerfilEmCache(user.id);
-      if (cached) setLoadedPhoto(cached);
-
       void obterFotoPerfil(user.id)
         .then((url) => {
           if (active) setLoadedPhoto(url);
         })
-        .catch(() => undefined);
+        .catch(() => {
+          if (active) setLoadedPhoto(null);
+        });
 
       return () => {
         active = false;
@@ -51,7 +50,6 @@ export const TabTopBar = memo(function TabTopBar({ showGreeting = false, photoUr
         source={require('../assets/ListeLogo.png')}
         style={styles.logo}
         resizeMode="contain"
-        fadeDuration={0}
       />
 
       <View style={styles.accountArea}>
@@ -67,7 +65,7 @@ export const TabTopBar = memo(function TabTopBar({ showGreeting = false, photoUr
           style={({ pressed }) => [styles.accountButton, pressed && styles.accountPressed]}
         >
           {photo ? (
-            <Image source={{ uri: photo }} style={styles.accountPhoto} fadeDuration={0} />
+            <Image source={{ uri: photo }} style={styles.accountPhoto} />
           ) : (
             <AppText style={styles.accountFallback}>👤</AppText>
           )}
@@ -75,7 +73,7 @@ export const TabTopBar = memo(function TabTopBar({ showGreeting = false, photoUr
       </View>
     </View>
   );
-});
+}
 
 const styles = StyleSheet.create({
   topRow: {
