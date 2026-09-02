@@ -26,6 +26,8 @@ export default function PurchaseScreen() {
   const [extraOpen, setExtraOpen] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
   const [finishing, setFinishing] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<ItemCompra | null>(null);
+  const [blockedSession, setBlockedSession] = useState<SessaoCompra | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -33,7 +35,7 @@ export default function PurchaseScreen() {
     void (async () => {
       const stored = await carregarSessaoCompra(user.id);
       if (stored && stored.listaId !== listaId) {
-        Alert.alert('Outra compra está em andamento', `Finalize “${stored.nomeLista}” antes de abrir outra lista.`, [{ text: 'Voltar', onPress: () => router.replace('/(tabs)/comprar') }]);
+        if (active) setBlockedSession(stored);
         return;
       }
       if (stored) { if (active) setSession(stored); return; }
@@ -100,17 +102,25 @@ export default function PurchaseScreen() {
     setPendingOpen(false);
   }
 
-  if (!session) return <Screen><PageHeader title="Carregando compra" back /><Card><AppText>Preparando os itens deste aparelho…</AppText></Card></Screen>;
+  async function confirmRemoveItem() {
+    const target = removeTarget;
+    if (!target) return;
+    setRemoveTarget(null);
+    await updateItems((items) => items.filter((entry) => entry.id !== target.id));
+  }
+
+  if (!session) return <Screen><PageHeader title="Carregando compra" back /><Card><AppText>Preparando os itens deste aparelho…</AppText></Card><BottomSheet visible={Boolean(blockedSession)} onClose={() => router.replace('/(tabs)/comprar')}><AppText style={styles.sheetTitle}>Outra compra está em andamento</AppText><AppText style={styles.sheetText}>{blockedSession ? `Finalize “${blockedSession.nomeLista}” antes de abrir outra lista.` : 'Finalize a compra atual antes de abrir outra lista.'}</AppText>{blockedSession ? <Button label="Continuar compra atual" onPress={() => router.replace({ pathname: '/compra/[listaId]', params: { listaId: blockedSession.listaId } })} /> : null}<Button label="Voltar às compras" variant="ghost" onPress={() => router.replace('/(tabs)/comprar')} /></BottomSheet></Screen>;
 
   const destinations = cloud.data.historico.filter((list) => list.id !== session.listaId);
   return (
     <Screen>
       <PageHeader title={session.nomeLista} subtitle={session.dataPrevista ? `Agendada para ${new Date(`${session.dataPrevista}T12:00:00`).toLocaleDateString('pt-BR')}` : 'Compra em andamento neste aparelho'} back />
       <Card style={styles.summary}><View><AppText style={styles.progress}>{progress}% concluída</AppText><AppText style={styles.meta}>{session.itens.filter((item) => item.pego).length}/{session.itens.length} itens</AppText></View><AppText style={styles.total}>{money.format(total)}</AppText></Card>
-      {session.itens.map((item) => <PurchaseRow key={item.id} item={item} onPatch={patch} onRemove={() => Alert.alert('Excluir item?', item.nome, [{ text: 'Cancelar', style: 'cancel' }, { text: 'Excluir', style: 'destructive', onPress: () => void updateItems((items) => items.filter((entry) => entry.id !== item.id)) }])} />)}
+      {session.itens.map((item) => <PurchaseRow key={item.id} item={item} onPatch={patch} onRemove={() => setRemoveTarget(item)} />)}
       <View style={styles.actions}><Button label="+ Adicionar item extra" variant="secondary" onPress={() => setExtraOpen(true)} /><Button label={finishing ? 'Salvando…' : 'Finalizar compra'} loading={finishing} onPress={() => void finish()} /></View>
 
       <BottomSheet visible={extraOpen} onClose={() => setExtraOpen(false)}><AppText style={styles.sheetTitle}>Adicionar item extra</AppText><ItemForm onSubmit={(value) => void addExtra(value)} submitLabel="Adicionar à compra" /></BottomSheet>
+      <BottomSheet visible={Boolean(removeTarget)} onClose={() => setRemoveTarget(null)}><AppText style={styles.sheetTitle}>Excluir item?</AppText><AppText style={styles.sheetText}>{removeTarget ? `“${removeTarget.nome}” será removido desta compra em andamento.` : ''}</AppText><Button label="Excluir item" variant="dangerOutline" onPress={() => void confirmRemoveItem()} /><Button label="Cancelar" variant="ghost" onPress={() => setRemoveTarget(null)} /></BottomSheet>
       <BottomSheet visible={pendingOpen} onClose={() => setPendingOpen(false)}>
         <AppText style={styles.sheetTitle}>Existem {pending.length} itens pendentes</AppText><AppText style={styles.sheetText}>Para finalizar, apague os pendentes ou transfira-os para outra lista.</AppText>
         {destinations.length ? <><AppText style={styles.destinationTitle}>Transferir para:</AppText>{destinations.map((list) => <Pressable key={list.id} onPress={() => void transferPending(list.id)} style={styles.destination}><AppText style={styles.destinationText}>📋 {list.nome}</AppText></Pressable>)}</> : null}
