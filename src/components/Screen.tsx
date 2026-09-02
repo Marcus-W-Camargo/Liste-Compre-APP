@@ -1,5 +1,6 @@
-import type { PropsWithChildren } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useMemo, type PropsWithChildren } from 'react';
+import { Keyboard, KeyboardAvoidingView, PanResponder, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { router, usePathname } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '@/theme';
 
@@ -8,7 +9,48 @@ type ScreenProps = PropsWithChildren<{
   padded?: boolean;
 }>;
 
+const TAB_ROUTES = [
+  '/(tabs)/home',
+  '/(tabs)/listas',
+  '/(tabs)/comprar',
+  '/(tabs)/historico',
+] as const;
+
+const TAB_NAMES = ['home', 'listas', 'comprar', 'historico'] as const;
+const SWIPE_DISTANCE = 64;
+const SWIPE_AXIS_RATIO = 1.25;
+
+function getTabIndex(pathname: string) {
+  const segment = pathname.split('/').filter(Boolean).at(-1);
+  return TAB_NAMES.findIndex((name) => name === segment);
+}
+
 export function Screen({ children, scroll = true, padded = true }: ScreenProps) {
+  const pathname = usePathname();
+  const tabIndex = getTabIndex(pathname);
+
+  const panResponder = useMemo(() => PanResponder.create({
+    onMoveShouldSetPanResponder: (_event, gesture) => {
+      if (tabIndex < 0) return false;
+      const horizontal = Math.abs(gesture.dx);
+      const vertical = Math.abs(gesture.dy);
+      return horizontal > 18 && horizontal > vertical * SWIPE_AXIS_RATIO;
+    },
+    onPanResponderRelease: (_event, gesture) => {
+      if (tabIndex < 0) return;
+      const horizontal = Math.abs(gesture.dx);
+      const vertical = Math.abs(gesture.dy);
+      if (horizontal < SWIPE_DISTANCE || horizontal <= vertical * SWIPE_AXIS_RATIO) return;
+
+      const nextIndex = gesture.dx < 0 ? tabIndex + 1 : tabIndex - 1;
+      if (nextIndex < 0 || nextIndex >= TAB_ROUTES.length) return;
+
+      Keyboard.dismiss();
+      router.navigate(TAB_ROUTES[nextIndex]);
+    },
+    onPanResponderTerminationRequest: () => true,
+  }), [tabIndex]);
+
   const content = scroll ? (
     <ScrollView
       contentContainerStyle={[styles.content, padded && styles.padded]}
@@ -24,7 +66,7 @@ export function Screen({ children, scroll = true, padded = true }: ScreenProps) 
   );
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']} {...panResponder.panHandlers}>
       <View pointerEvents="none" style={styles.decorOne} />
       <View pointerEvents="none" style={styles.decorTwo} />
       <KeyboardAvoidingView
