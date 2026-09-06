@@ -83,13 +83,42 @@ O aparelho conectado é SM-G990E (Galaxy S21 FE), Android 16. A V1 instalada é 
 - Ativação: LC_APP_VARIANT=v110-test
 - O app padrão mantém package e scheme originais.
 
-No PowerShell, com SDK Android e JDK configurados:
+### Build de desenvolvimento no aparelho
+
+`npx expo run:android --device` instala uma build de desenvolvimento. Ela não contém um bundle JavaScript autônomo e, portanto, precisa do Metro ativo em `localhost:8081` sempre que for aberta.
+
+No PowerShell, dentro do repositório:
 
 ```powershell
 $env:LC_APP_VARIANT = 'v110-test'
 npx expo prebuild --platform android --no-install
 npx expo run:android --device
 ```
+
+Depois, para usar essa instalação em um aparelho físico conectado por USB, manter o Metro ativo e encaminhar a porta:
+
+```powershell
+& 'J:\Android\Sdk\platform-tools\adb.exe' reverse tcp:8081 tcp:8081
+npx expo start --localhost --clear
+```
+
+Com o Metro rodando, abrir `Liste & Compre V1.1 Teste` no celular. Fechar o terminal do Metro faz essa build voltar a exibir `Unable to load script` ao ser iniciada.
+
+### Build standalone para teste sem Metro
+
+Para validar a instalação sem depender do computador/Metro, gerar uma build release da variante de teste:
+
+```powershell
+$env:LC_APP_VARIANT = 'v110-test'
+npx expo prebuild --platform android --no-install --clean
+npx expo run:android --variant release --device
+```
+
+Essa build deve ser usada como etapa final da matriz física antes do merge. Ela continua usando o package separado `com.marcuscamargo.listecompre.v110test`, sem substituir a V1 oficial.
+
+### Diagnóstico registrado em 06/09/2026
+
+A primeira instalação da variante V1.1.0 abriu a tela de erro porque foi gerada como build de desenvolvimento e o Metro não estava ativo. O log do aparelho registrou `Failed to connect to localhost/127.0.0.1:8081` e `Unable to load script`; não foi identificado crash nativo nem falha da implementação de safe area nesse diagnóstico.
 
 O teste separado exige login e mantém seu armazenamento local independente da V1. Não transfere uma compra em andamento automaticamente.
 
