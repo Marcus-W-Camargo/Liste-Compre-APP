@@ -9,6 +9,7 @@
     "icon": "./src/assets/app-icon.png",
     "android": {
       "package": "com.marcuscamargo.listecompre",
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/app-icon.png",
         "backgroundColor": "#FFFFFF"
