@@ -47,7 +47,7 @@ export default function HomeTab() {
   }
 
   return (
-    <Screen scroll={false}>
+    <Screen safeBottom={false}>
       <View style={styles.content}>
         <TabTopBar showGreeting />
 

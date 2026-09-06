@@ -2,7 +2,7 @@ name: Mobile CI
 
 on:
   push:
-    branches: [main, feat/mobile-app-v1]
+    branches: [main, feat/mobile-app-v1, fix/v1.1.0-safe-area]
   pull_request:
     branches: [main]
 
