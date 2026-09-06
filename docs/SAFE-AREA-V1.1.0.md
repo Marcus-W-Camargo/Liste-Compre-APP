@@ -73,3 +73,28 @@ npx expo start --localhost --clear
 Autorizar a depuração USB no celular. O dispositivo deve aparecer como `device`, não `unauthorized`. Com o servidor ativo, pressionar `a` para abrir no Android conectado. Se necessário, abrir no Expo Go a URL local mostrada pelo Expo. Manter o servidor rodando.
 
 No S21 FE, alternar Configurações → Visor → Barra de navegação entre Botões e Gestos de deslizar e repetir a matriz. Não é necessário gerar APK para esta primeira verificação. A validação em Expo Go não substitui uma futura validação do APK preview.
+
+## Instalação efetivamente identificada e variante de teste
+
+O aparelho conectado é SM-G990E (Galaxy S21 FE), Android 16. A V1 instalada é uma build nativa release; o pacote Expo Go não foi encontrado. Por isso o teste usa uma instalação independente:
+
+- Nome: Liste & Compre V1.1 Teste
+- Package: com.marcuscamargo.listecompre.v110test
+- Ativação: LC_APP_VARIANT=v110-test
+- O app padrão mantém package e scheme originais.
+
+No PowerShell, com SDK Android e JDK configurados:
+
+```powershell
+$env:LC_APP_VARIANT = 'v110-test'
+npx expo prebuild --platform android --no-install
+npx expo run:android --device
+```
+
+O teste separado exige login e mantém seu armazenamento local independente da V1. Não transfere uma compra em andamento automaticamente.
+
+O ícone app-icon.png foi reutilizado, sem edição, dos recursos Android da cópia local da V1 (mipmap-xxxhdpi/ic_launcher.png). O logo horizontal ListeLogo.png permanece na interface. Expo Doctor exige um ícone quadrado.
+
+O botão de mostrar senha usa posicionamento absoluto dentro do próprio campo, já contido na região segura; não é um controle flutuante da tela.
+
+Validação local após alinhamento dos patches Expo: TypeScript aprovado, lint sem erros (avisos existentes), 20 testes aprovados, export Android aprovado e Expo Doctor 21/21 aprovado. A build nativa e a matriz visual devem ser registradas após sua conclusão.

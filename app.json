@@ -6,11 +6,11 @@
     "version": "1.1.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "icon": "./src/assets/ListeLogo.png",
+    "icon": "./src/assets/app-icon.png",
     "android": {
       "package": "com.marcuscamargo.listecompre",
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/ListeLogo.png",
+        "foregroundImage": "./src/assets/app-icon.png",
         "backgroundColor": "#FFFFFF"
       }
     },
