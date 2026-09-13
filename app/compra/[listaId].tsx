@@ -115,7 +115,11 @@ export default function PurchaseScreen() {
     setFinishing(true);
     const completed = finalizarSessao(session);
     try {
-      cloud.mutate((data) => { data.compras.push(completed); });
+      cloud.mutate((data) => {
+        data.compras.push(completed);
+        data.historico = data.historico.filter((list) => list.id !== session.listaId);
+        if (data.edicaoId === session.listaId) data.edicaoId = null;
+      });
       await cloud.flush();
       await limparSessaoCompra(user.id);
       setSession(null);
