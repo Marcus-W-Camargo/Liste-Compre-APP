@@ -11,9 +11,12 @@
 [![Android](https://img.shields.io/badge/Android-V1-3DDC84?logo=android&logoColor=white)](https://developer.android.com/)
 [![CI](https://github.com/Marcus-W-Camargo/Liste-Compre-APP/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Marcus-W-Camargo/Liste-Compre-APP/actions/workflows/ci.yml)
 
-**Versão:** `1.0.0`  
+**Versão pública:** `1.0`  
 **Plataforma inicial:** Android  
-**Status:** V1 consolidada na `main`; distribuição pública ainda não documentada no repositório.
+**Status:** release pública disponível via Cloudflare R2; desenvolvimento consolidado na `main`.
+
+**Download oficial do APK:**  
+https://pub-2b70722df74e452daa43c450bd639a7b.r2.dev/android/v1.0/liste-e-compre-v1.0.apk
 
 ---
 
@@ -21,7 +24,7 @@
 
 O aplicativo foi projetado especificamente para uso mobile, com navegação por toque e gestos, campos numéricos adaptados ao Android e persistência local da compra em andamento.
 
-> **Capturas de tela:** antes da publicação pública, adicionar de 3 a 4 screenshots reais em `docs/screenshots/`, priorizando:
+> **Capturas de tela:** adicionar de 3 a 4 screenshots reais em `docs/screenshots/`, priorizando:
 >
 > - Início;
 > - Listas;
@@ -52,7 +55,7 @@ A proposta é conectar duas etapas que normalmente ficam separadas:
 1. **planejar a compra**, organizando listas, produtos, quantidades e medidas;
 2. **executar a compra**, registrando preços, extras, pendências e total em tempo real.
 
-Após a finalização, os dados passam a compor o histórico da conta e podem ser reutilizados em compras futuras.
+Após a finalização, os dados passam a compor o histórico da conta e podem ser reutilizados em compras futuras. A lista utilizada deixa de aparecer entre as listas disponíveis para compra após a conclusão, evitando duplicidade entre fluxo ativo e histórico.
 
 ### Por que um aplicativo separado?
 
@@ -99,6 +102,8 @@ Durante uma compra, o usuário pode:
 - adicionar itens extras;
 - remover itens;
 - tratar produtos pendentes antes da finalização.
+
+Ao concluir a compra, a lista utilizada é removida das listas disponíveis e a compra passa a existir no histórico. Enquanto a compra não é concluída, a sessão permanece identificada como **Em andamento**.
 
 ### 💰 Valores e pesos
 
@@ -152,12 +157,28 @@ A área de conta oferece:
 - e-mail;
 - foto de perfil;
 - Central de Ajuda;
+- **Apoie-me**;
 - Política de Privacidade;
 - informações do criador;
 - encerramento de sessão;
 - exclusão permanente da conta.
 
 A foto de perfil pode ser selecionada da galeria ou capturada pela câmera e é armazenada no **Supabase Storage**.
+
+### 🧡 Apoie-me
+
+O aplicativo permanece gratuito e sem propagandas. A área **Apoie-me** permite contribuições voluntárias via PIX para apoiar a manutenção do Liste & Compre e o desenvolvimento de projetos atuais e futuros.
+
+A tela oferece:
+
+- PIX por e-mail: `listeecompre@gmail.com`;
+- QR Code PIX sem valor fixo;
+- botão para copiar o código PIX;
+- link para outros projetos no portfólio;
+- consentimento opcional para agradecimento público no Instagram;
+- orientação para que apoiadores que desejem agradecimento público incluam o nome na observação do PIX.
+
+A contribuição é totalmente opcional e não desbloqueia recursos, funcionalidades ou vantagens no aplicativo.
 
 ### 🔐 Autenticação
 
@@ -338,10 +359,12 @@ npm run check
 | Conectividade | NetInfo | Estado de rede |
 | Mídia | Expo Image Picker | Câmera e galeria |
 | Processamento | Expo Image Manipulator | Tratamento de imagens |
+| Clipboard | Expo Clipboard | Cópia do código PIX |
 | Tipografia | Poppins / Expo Google Fonts | Identidade visual |
 | Testes | Vitest | Testes automatizados |
 | Lint | Oxlint | Análise estática |
 | CI | GitHub Actions | Validação automática |
+| Distribuição | Cloudflare R2 | Hospedagem pública do APK |
 
 ---
 
@@ -353,6 +376,7 @@ npm run check
 │   ├── (tabs)/            # Início, Listas, Comprar e Histórico
 │   ├── compra/            # Fluxo da compra em andamento
 │   ├── conta.tsx          # Conta e perfil
+│   ├── apoie.tsx          # Apoio voluntário via PIX
 │   ├── ajuda.tsx          # FAQ e feedback
 │   ├── privacidade.tsx    # Política de Privacidade
 │   └── ...                # Autenticação e demais rotas
@@ -373,7 +397,7 @@ npm run check
 ├── docs/                  # Documentação complementar
 ├── .github/workflows/     # CI
 ├── app.json               # Configuração Expo
-├── eas.json               # Perfis de build
+├── eas.json               # Perfis auxiliares de build
 ├── package.json
 └── package-lock.json
 ```
@@ -388,7 +412,7 @@ npm run check
 - npm;
 - Android Studio;
 - Android SDK;
-- JDK compatível com o ambiente Android;
+- JDK 17;
 - dispositivo Android ou emulador;
 - projeto Supabase configurado.
 
@@ -433,42 +457,65 @@ A plataforma inicial do projeto é **Android**. A existência de configuração 
 
 ## 📦 Produção Android
 
-Identidade atual do aplicativo:
+Identidade de distribuição atual:
 
 ```text
-Version: 1.0.0
+Release pública: 1.0
 Package: com.marcuscamargo.listecompre
+Formato público: APK
+Canal: Cloudflare R2
 ```
 
-O `eas.json` mantém perfis distintos:
+A release pública atual é gerada **localmente**, sem depender de conta Expo/EAS para assinatura ou distribuição.
 
-- **development** — development client para uso interno;
-- **preview** — distribuição interna em formato APK;
-- **production** — build Android em formato **AAB (Android App Bundle)**.
+Fluxo usado no ambiente Android:
 
-Essa separação evita tratar um APK de preview como artefato oficial de produção.
+```bash
+npx expo prebuild --platform android
+cd android
+./gradlew generateCodegenArtifactsFromSchema
+./gradlew assembleRelease
+```
+
+Artefato gerado:
+
+```text
+android/app/build/outputs/apk/release/app-release.apk
+```
+
+O arquivo distribuído publicamente é renomeado para:
+
+```text
+liste-e-compre-v1.0.apk
+```
+
+> O arquivo `eas.json` permanece no projeto como configuração auxiliar, mas não é o mecanismo utilizado para a release pública atual.
 
 ### Assinatura
 
-Builds oficiais de Android devem utilizar uma chave privada de release.
+Builds oficiais Android utilizam uma chave privada de release mantida fora do repositório.
 
 Essa chave:
 
 - não deve ser publicada;
 - não deve ser incluída no repositório;
-- precisa ser preservada para futuras atualizações do aplicativo.
+- precisa ser preservada e mantida em backups redundantes para futuras atualizações;
+- define a linha de atualização compatível dos APKs assinados com ela.
+
+A distribuição `1.0` publicada em setembro de 2026 inicia uma **nova linha de assinatura**. Builds antigas assinadas com outra chave não podem ser atualizadas diretamente por cima desta versão; nesses casos, é necessário desinstalar a instalação antiga antes de instalar a nova.
 
 ### Distribuição pública
 
-O repositório ainda não documenta uma URL pública definitiva de distribuição da V1.0.0.
+**Versão:** `1.0`  
+**Formato:** APK  
+**Arquivo:** `liste-e-compre-v1.0.apk`  
+**Storage:** Cloudflare R2  
+**Objeto:** `android/v1.0/liste-e-compre-v1.0.apk`
 
-Quando a distribuição oficial estiver estabelecida, esta seção deve incluir somente informações verificáveis, como:
+**Download oficial:**  
+https://pub-2b70722df74e452daa43c450bd639a7b.r2.dev/android/v1.0/liste-e-compre-v1.0.apk
 
-- canal oficial de download;
-- formato disponibilizado;
-- versão;
-- checksum do artefato, quando aplicável;
-- data da release.
+As versões antigas armazenadas no bucket foram removidas antes da publicação desta nova linha de distribuição.
 
 ---
 
@@ -486,7 +533,7 @@ Web e mobile compartilham autenticação e infraestrutura de dados, mas permanec
 
 ## 📌 Estado da V1
 
-A versão `1.0.0` reúne, no código atual:
+A release pública `1.0` reúne, no código atual:
 
 - autenticação;
 - cadastro;
@@ -495,6 +542,7 @@ A versão `1.0.0` reúne, no código atual:
 - catálogo de produtos;
 - autocomplete;
 - compra em andamento;
+- remoção da lista disponível após conclusão da compra;
 - preços;
 - unidades e quilogramas;
 - itens extras;
@@ -502,6 +550,8 @@ A versão `1.0.0` reúne, no código atual:
 - reutilização de compras anteriores;
 - perfil;
 - foto de usuário;
+- área **Apoie-me** com PIX e QR Code;
+- consentimento opcional para agradecimento público;
 - exclusão de conta;
 - FAQ;
 - feedback;
@@ -514,18 +564,16 @@ A versão `1.0.0` reúne, no código atual:
 - testes;
 - contratos de segurança;
 - CI;
-- configuração de build Android.
+- build Android local assinado;
+- distribuição pública via Cloudflare R2.
 
 ---
 
 ## 🗺️ Próximos passos de documentação
 
-Antes da divulgação pública do repositório como peça principal de portfólio:
-
 - [ ] adicionar screenshots reais do aplicativo;
-- [ ] documentar o canal oficial de distribuição Android;
-- [ ] adicionar checksum somente após congelar o artefato oficial;
-- [ ] registrar release pública quando aplicável;
+- [ ] adicionar checksum do APK oficial, caso passe a ser publicado como parte do processo de release;
+- [ ] registrar releases futuras com changelog;
 - [ ] criar uma versão em inglês separada (`README.en.md`) se houver necessidade de apresentação internacional.
 
 ---
